@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipper Test Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h1 class="text-3xl font-bold text-gray-900 mb-6">
+                    <i class="fas fa-truck text-blue-600 mr-3"></i>
+                    Shipper Test Page
+                </h1>
+                
+                <div class="space-y-6">
+                    <!-- Success Message -->
+                    <div th:if="${param.success}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Đã tạo dữ liệu test thành công!
+                    </div>
+                    
+                    <!-- Deleted Message -->
+                    <div th:if="${param.deleted}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                        <i class="fas fa-trash mr-2"></i>
+                        Đã xóa tất cả dữ liệu test!
+                    </div>
+                    
+                    <!-- Test Actions -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3">
+                                <i class="fas fa-database mr-2"></i>
+                                Tạo dữ liệu test
+                            </h3>
+                            <p class="text-blue-700 mb-4">
+                                Tạo 5 đơn hàng test với các trạng thái khác nhau để test chức năng shipper.
+                            </p>
+                            <form method="post" action="/shipper-test/create-test-orders">
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Tạo đơn hàng test
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="bg-red-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold text-red-900 mb-3">
+                                <i class="fas fa-trash mr-2"></i>
+                                Xóa dữ liệu test
+                            </h3>
+                            <p class="text-red-700 mb-4">
+                                Xóa tất cả đơn hàng test (có mã đơn bắt đầu bằng "TEST") để chỉ hiển thị dữ liệu thật.
+                            </p>
+                            <form method="post" action="/shipper-test/delete-test-orders" onsubmit="return confirm('Bạn có chắc muốn xóa tất cả dữ liệu test?')">
+                                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium">
+                                    <i class="fas fa-trash mr-2"></i>
+                                    Xóa dữ liệu test
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="bg-green-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold text-green-900 mb-3">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                Truy cập Shipper Dashboard
+                            </h3>
+                            <p class="text-green-700 mb-4">
+                                Mở trang shipper dashboard để test các chức năng giao hàng.
+                            </p>
+                            <a href="/shipper" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium inline-block">
+                                <i class="fas fa-truck mr-2"></i>
+                                Mở Shipper Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- API Test Section -->
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-code mr-2"></i>
+                            Test API Endpoints
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between bg-white p-3 rounded border">
+                                <span class="font-mono text-sm">GET /api/shipper/orders/available</span>
+                                <button onclick="testApi('/api/shipper/orders/available?page=0&size=10')" 
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                                    Test
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between bg-white p-3 rounded border">
+                                <span class="font-mono text-sm">GET /api/shipper/stats?shipperId=shipper123</span>
+                                <button onclick="testApi('/api/shipper/stats?shipperId=shipper123')" 
+                                        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                                    Test
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Test Results -->
+                    <div id="test-results" class="hidden bg-white p-4 rounded-lg border">
+                        <h4 class="font-semibold text-gray-900 mb-2">API Response:</h4>
+                        <pre id="api-response" class="bg-gray-100 p-3 rounded text-sm overflow-auto max-h-64"></pre>
+                    </div>
+                    
+                    <!-- Instructions -->
+                    <div class="bg-yellow-50 p-6 rounded-lg">
+                        <h3 class="text-lg font-semibold text-yellow-900 mb-3">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Hướng dẫn test
+                        </h3>
+                        <ol class="list-decimal list-inside space-y-2 text-yellow-800">
+                            <li>Nhấn "Tạo đơn hàng test" để tạo dữ liệu mẫu</li>
+                            <li>Nhấn "Mở Shipper Dashboard" để truy cập trang shipper</li>
+                            <li>Trong trang shipper, bạn sẽ thấy danh sách đơn hàng</li>
+                            <li>Test các chức năng: "Nhận giao" → "Xác nhận giao" → "Giao thành công"</li>
+                            <li>Đơn hàng sẽ biến mất sau khi giao thành công</li>
+                            <li>Nhấn "Chi tiết" để xem thông tin khách hàng</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testApi(url) {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                document.getElementById('test-results').classList.remove('hidden');
+                document.getElementById('api-response').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('test-results').classList.remove('hidden');
+                document.getElementById('api-response').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

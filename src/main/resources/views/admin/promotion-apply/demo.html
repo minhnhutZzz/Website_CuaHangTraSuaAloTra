@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Áp dụng Khuyến mãi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .demo-card {
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .demo-card:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .demo-card.selected {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+        .price-original {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        .price-discounted {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .calculation-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-5">
+            <i class="fas fa-tags text-primary me-2"></i>
+            Demo Áp dụng Khuyến mãi
+        </h1>
+        
+        <div class="row">
+            <!-- Promotions -->
+            <div class="col-md-4">
+                <h3>Khuyến mãi có sẵn</h3>
+                <div class="demo-card card mb-3" onclick="selectPromotion(this, 'PROMO1', 'Giảm giá 20%', 20)">
+                    <div class="card-body">
+                        <h5>Giảm giá 20%</h5>
+                        <p class="text-muted">Áp dụng cho tất cả sản phẩm</p>
+                        <span class="badge bg-danger">20%</span>
+                    </div>
+                </div>
+                
+                <div class="demo-card card mb-3" onclick="selectPromotion(this, 'PROMO2', 'Giảm giá 30%', 30)">
+                    <div class="card-body">
+                        <h5>Giảm giá 30%</h5>
+                        <p class="text-muted">Khuyến mãi đặc biệt</p>
+                        <span class="badge bg-danger">30%</span>
+                    </div>
+                </div>
+                
+                <div class="demo-card card mb-3" onclick="selectPromotion(this, 'PROMO3', 'Giảm giá 50%', 50)">
+                    <div class="card-body">
+                        <h5>Giảm giá 50%</h5>
+                        <p class="text-muted">Flash sale cuối tuần</p>
+                        <span class="badge bg-danger">50%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Products -->
+            <div class="col-md-4">
+                <h3>Sản phẩm</h3>
+                <div class="demo-card card mb-3" onclick="selectProduct(this, 'PROD1', 'iPhone 15 Pro', 25000000)">
+                    <div class="card-body">
+                        <h5>iPhone 15 Pro</h5>
+                        <p class="text-muted">Điện thoại cao cấp</p>
+                        <div class="price-original">25,000,000 VNĐ</div>
+                        <div class="price-discounted" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="demo-card card mb-3" onclick="selectProduct(this, 'PROD2', 'MacBook Air M2', 22000000)">
+                    <div class="card-body">
+                        <h5>MacBook Air M2</h5>
+                        <p class="text-muted">Laptop cao cấp</p>
+                        <div class="price-original">22,000,000 VNĐ</div>
+                        <div class="price-discounted" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="demo-card card mb-3" onclick="selectProduct(this, 'PROD3', 'AirPods Pro', 5000000)">
+                    <div class="card-body">
+                        <h5>AirPods Pro</h5>
+                        <p class="text-muted">Tai nghe không dây</p>
+                        <div class="price-original">5,000,000 VNĐ</div>
+                        <div class="price-discounted" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <div class="demo-card card mb-3" onclick="selectProduct(this, 'PROD4', 'Apple Watch', 8000000)">
+                    <div class="card-body">
+                        <h5>Apple Watch</h5>
+                        <p class="text-muted">Đồng hồ thông minh</p>
+                        <div class="price-original">8,000,000 VNĐ</div>
+                        <div class="price-discounted" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calculation -->
+            <div class="col-md-4">
+                <div class="calculation-panel">
+                    <h4 class="mb-3">
+                        <i class="fas fa-calculator me-2"></i>
+                        Tính toán
+                    </h4>
+                    
+                    <div id="selectedPromotionInfo" class="mb-3" style="display: none;">
+                        <h6>Khuyến mãi đã chọn:</h6>
+                        <div class="bg-white bg-opacity-25 p-2 rounded">
+                            <div id="selectedPromotionName"></div>
+                            <div id="selectedPromotionDiscount"></div>
+                        </div>
+                    </div>
+                    
+                    <div id="selectedProductsInfo" class="mb-3">
+                        <h6>Sản phẩm đã chọn: <span id="selectedCount">0</span></h6>
+                        <div id="selectedProductsList" class="mb-3">
+                            <div class="text-center text-white-50">
+                                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                                <p>Chưa có sản phẩm nào được chọn</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="totalCalculation" class="mb-3" style="display: none;">
+                        <h6>Tổng kết:</h6>
+                        <div class="bg-white bg-opacity-25 p-2 rounded">
+                            <div class="d-flex justify-content-between">
+                                <span>Tổng gốc:</span>
+                                <span id="totalOriginalPrice">0 VNĐ</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Giảm giá:</span>
+                                <span id="totalDiscount">0 VNĐ</span>
+                            </div>
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Thành tiền:</span>
+                                <span id="totalFinalPrice">0 VNĐ</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-light" onclick="applyPromotion()" id="applyBtn" disabled>
+                            <i class="fas fa-tags me-2"></i>
+                            Áp dụng Khuyến mãi
+                        </button>
+                        <button class="btn btn-outline-light" onclick="clearAll()">
+                            <i class="fas fa-undo me-2"></i>
+                            Làm mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle me-2"></i>Hướng dẫn sử dụng</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li><strong>Chọn khuyến mãi:</strong> Click vào một khuyến mãi từ danh sách bên trái</li>
+                            <li><strong>Chọn sản phẩm:</strong> Click vào các sản phẩm muốn áp dụng khuyến mãi</li>
+                            <li><strong>Xem tính toán:</strong> Giá sau giảm sẽ được hiển thị tự động</li>
+                            <li><strong>Áp dụng:</strong> Click nút "Áp dụng Khuyến mãi" để lưu</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedPromotion = null;
+        let selectedProducts = new Map();
+
+        function selectPromotion(element, id, name, discount) {
+            // Remove previous selection
+            document.querySelectorAll('.demo-card').forEach(card => {
+                if (card.querySelector('.badge.bg-danger')) {
+                    card.classList.remove('selected');
+                }
+            });
+            
+            // Add selection to clicked element
+            element.classList.add('selected');
+            
+            // Store selected promotion data
+            selectedPromotion = { id, name, discount };
+            
+            // Update UI
+            updateSelectedPromotionInfo();
+            updateProductPrices();
+            updateCalculation();
+        }
+
+        function selectProduct(element, id, name, price) {
+            if (selectedProducts.has(id)) {
+                // Deselect
+                selectedProducts.delete(id);
+                element.classList.remove('selected');
+            } else {
+                // Select
+                selectedProducts.set(id, { id, name, price });
+                element.classList.add('selected');
+            }
+            
+            updateSelectedProductsInfo();
+            updateProductPrices();
+            updateCalculation();
+        }
+
+        function updateSelectedPromotionInfo() {
+            if (selectedPromotion) {
+                document.getElementById('selectedPromotionInfo').style.display = 'block';
+                document.getElementById('selectedPromotionName').textContent = selectedPromotion.name;
+                document.getElementById('selectedPromotionDiscount').textContent = 'Giảm ' + selectedPromotion.discount + '%';
+            }
+        }
+
+        function updateSelectedProductsInfo() {
+            const count = selectedProducts.size;
+            document.getElementById('selectedCount').textContent = count;
+            
+            const list = document.getElementById('selectedProductsList');
+            
+            if (count === 0) {
+                list.innerHTML = `
+                    <div class="text-center text-white-50">
+                        <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                        <p>Chưa có sản phẩm nào được chọn</p>
+                    </div>
+                `;
+            } else {
+                list.innerHTML = Array.from(selectedProducts.values()).map(product => `
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-white bg-opacity-25 rounded">
+                        <div>
+                            <div class="fw-bold">${product.name}</div>
+                            <div class="small">
+                                <span class="price-original">${formatCurrency(product.price)}</span>
+                                <span class="price-discounted ms-2" id="list-discounted-${product.id}" style="display: none;"></span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-light" onclick="removeProduct('${product.id}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateProductPrices() {
+            if (!selectedPromotion) return;
+            
+            const discount = selectedPromotion.discount / 100;
+            
+            selectedProducts.forEach((product, productId) => {
+                const discountedPrice = product.price * (1 - discount);
+                
+                // Update main product card
+                const element = document.querySelector(`[onclick*="${productId}"]`);
+                if (element) {
+                    const discountedPriceEl = element.querySelector('.price-discounted');
+                    if (discountedPriceEl) {
+                        discountedPriceEl.textContent = formatCurrency(discountedPrice);
+                        discountedPriceEl.style.display = 'inline';
+                    }
+                }
+                
+                // Update selected products list
+                const listDiscountedEl = document.getElementById('list-discounted-' + productId);
+                if (listDiscountedEl) {
+                    listDiscountedEl.textContent = formatCurrency(discountedPrice);
+                    listDiscountedEl.style.display = 'inline';
+                }
+            });
+        }
+
+        function updateCalculation() {
+            if (selectedProducts.size === 0 || !selectedPromotion) {
+                document.getElementById('totalCalculation').style.display = 'none';
+                document.getElementById('applyBtn').disabled = true;
+                return;
+            }
+            
+            const discount = selectedPromotion.discount / 100;
+            let totalOriginal = 0;
+            let totalDiscount = 0;
+            
+            selectedProducts.forEach(product => {
+                totalOriginal += product.price;
+                totalDiscount += product.price * discount;
+            });
+            
+            const totalFinal = totalOriginal - totalDiscount;
+            
+            document.getElementById('totalOriginalPrice').textContent = formatCurrency(totalOriginal);
+            document.getElementById('totalDiscount').textContent = formatCurrency(totalDiscount);
+            document.getElementById('totalFinalPrice').textContent = formatCurrency(totalFinal);
+            
+            document.getElementById('totalCalculation').style.display = 'block';
+            document.getElementById('applyBtn').disabled = false;
+        }
+
+        function removeProduct(productId) {
+            const element = document.querySelector(`[onclick*="${productId}"]`);
+            if (element) {
+                selectProduct(element, productId, '', 0);
+            }
+        }
+
+        function clearAll() {
+            selectedPromotion = null;
+            selectedProducts.clear();
+            
+            document.querySelectorAll('.demo-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            document.querySelectorAll('.price-discounted').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            updateSelectedPromotionInfo();
+            updateSelectedProductsInfo();
+            updateCalculation();
+        }
+
+        function applyPromotion() {
+            if (!selectedPromotion || selectedProducts.size === 0) {
+                alert('Vui lòng chọn khuyến mãi và ít nhất một sản phẩm!');
+                return;
+            }
+            
+            const productIds = Array.from(selectedProducts.keys());
+            const discount = selectedPromotion.discount;
+            
+            alert(`Đã áp dụng khuyến mãi "${selectedPromotion.name}" (${discount}%) cho ${productIds.length} sản phẩm!\n\nSản phẩm: ${Array.from(selectedProducts.values()).map(p => p.name).join(', ')}`);
+            
+            clearAll();
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount);
+        }
+    </script>
+</body>
+</html>

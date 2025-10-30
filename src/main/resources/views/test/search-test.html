@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Tìm Kiếm - TRÀ SỮA MONA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-center mb-6 text-[#1f2d3d]">
+                <i class="fas fa-search text-blue-600 mr-2"></i>
+                Test Chức Năng Tìm Kiếm
+            </h1>
+            
+            <!-- Search Test Form -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-[#1f2d3d]">Test Tìm Kiếm Sản Phẩm</h2>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <form id="searchTestForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Từ khóa tìm kiếm:</label>
+                            <input type="text" id="searchTerm" placeholder="Nhập từ khóa tìm kiếm..." 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="flex space-x-4">
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-search mr-2"></i>
+                                Test Tìm Kiếm
+                            </button>
+                            <button type="button" onclick="clearResults()" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
+                                <i class="fas fa-trash mr-2"></i>
+                                Xóa Kết Quả
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Quick Test Buttons -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-[#1f2d3d]">Test Nhanh</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button onclick="quickSearch('trà sữa')" class="bg-amber-100 text-amber-800 px-4 py-2 rounded-lg hover:bg-amber-200 transition-colors">
+                        <i class="fas fa-coffee mr-2"></i>
+                        Trà sữa
+                    </button>
+                    <button onclick="quickSearch('matcha')" class="bg-green-100 text-green-800 px-4 py-2 rounded-lg hover:bg-green-200 transition-colors">
+                        <i class="fas fa-leaf mr-2"></i>
+                        Matcha
+                    </button>
+                    <button onclick="quickSearch('chocolate')" class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg hover:bg-yellow-200 transition-colors">
+                        <i class="fas fa-cookie-bite mr-2"></i>
+                        Chocolate
+                    </button>
+                    <button onclick="quickSearch('topping')" class="bg-pink-100 text-pink-800 px-4 py-2 rounded-lg hover:bg-pink-200 transition-colors">
+                        <i class="fas fa-candy-cane mr-2"></i>
+                        Topping
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results -->
+            <div id="searchResults" class="hidden">
+                <h2 class="text-xl font-semibold mb-4 text-[#1f2d3d]">Kết Quả Tìm Kiếm</h2>
+                <div id="resultsContent" class="bg-gray-50 p-4 rounded-lg">
+                    <!-- Results will be displayed here -->
+                </div>
+            </div>
+            
+            <!-- Debug Info -->
+            <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 class="font-semibold text-blue-900 mb-2">Debug Information</h3>
+                <div id="debugInfo" class="text-sm text-blue-700">
+                    <p>Chờ test tìm kiếm...</p>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="text-center mt-8">
+                <a href="/products" class="bg-[#cb5439] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#a8442f] transition-colors mr-4">
+                    <i class="fas fa-coffee mr-2"></i>
+                    Xem Trang Sản Phẩm
+                </a>
+                <a href="/" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-home mr-2"></i>
+                    Trang Chủ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test search functionality
+        document.getElementById('searchTestForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const searchTerm = document.getElementById('searchTerm').value.trim();
+            if (searchTerm) {
+                performSearch(searchTerm);
+            }
+        });
+        
+        function quickSearch(term) {
+            document.getElementById('searchTerm').value = term;
+            performSearch(term);
+        }
+        
+        function performSearch(searchTerm) {
+            console.log('Testing search for:', searchTerm);
+            updateDebugInfo(`Đang test tìm kiếm: "${searchTerm}"`);
+            
+            // Show loading
+            showResults();
+            document.getElementById('resultsContent').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p class="text-gray-600">Đang tìm kiếm "${searchTerm}"...</p>
+                </div>
+            `;
+            
+            // Redirect to products page with search
+            setTimeout(() => {
+                const searchUrl = `/products?search=${encodeURIComponent(searchTerm)}`;
+                updateDebugInfo(`Redirecting to: ${searchUrl}`);
+                window.location.href = searchUrl;
+            }, 1000);
+        }
+        
+        function showResults() {
+            document.getElementById('searchResults').classList.remove('hidden');
+        }
+        
+        function clearResults() {
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('searchTerm').value = '';
+            updateDebugInfo('Đã xóa kết quả');
+        }
+        
+        function updateDebugInfo(message) {
+            const debugDiv = document.getElementById('debugInfo');
+            const timestamp = new Date().toLocaleTimeString();
+            debugDiv.innerHTML += `<p>[${timestamp}] ${message}</p>`;
+        }
+        
+        // Check if we came from a search
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchTerm = urlParams.get('search');
+        if (searchTerm) {
+            updateDebugInfo(`Đã tìm kiếm: "${searchTerm}" - Kiểm tra xem kết quả có bị mất không`);
+            document.getElementById('searchTerm').value = searchTerm;
+            showResults();
+        }
+    </script>
+</body>
+</html>

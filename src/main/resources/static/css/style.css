@@ -1,0 +1,84 @@
+/* Custom CSS cho Spring Boot Shop */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 100px 0;
+}
+
+.feature-card {
+    transition: transform 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+    border-radius: 25px;
+    padding: 10px 20px;
+}
+
+.hero-section .btn {
+    border-radius: 30px;
+    padding: 15px 30px;
+    font-weight: bold;
+}
+
+footer {
+    margin-top: 50px;
+}
+
+/* Sidebar menu colors */
+.text-orange-600 {
+    color: #ea580c !important;
+}
+
+.hover\:bg-orange-50:hover {
+    background-color: #fff7ed !important;
+}
+
+/* Sidebar menu styling */
+#adminSidebarNav a {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 4px;
+}
+
+#adminSidebarNav a:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#adminSidebarNav a.bg-green-500 {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+#adminSidebarNav .menu-icon {
+    width: 20px;
+    text-align: center;
+}
+
+#adminSidebarNav .menu-text {
+    font-weight: 500;
+    font-size: 14px;
+}

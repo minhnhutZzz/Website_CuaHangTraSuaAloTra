@@ -1,0 +1,101 @@
+<!-- src/main/resources/templates/layouts/order-progress.html -->
+<div th:fragment="progress(order)" class="mt-6 p-5 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border border-blue-200 shadow-sm">
+    <div class="text-center mb-4">
+        <h3 class="text-lg font-bold text-blue-800">Trạng thái đơn hàng</h3>
+    </div>
+
+    <div class="relative">
+        <div class="flex justify-between items-center mb-3">
+            <div th:each="step, iter : ${steps}"
+                 th:classappend="${step.active} ? 'text-green-700 font-bold' : 'text-gray-500'"
+                 class="flex flex-col items-center text-xs w-1/5">
+                <div th:classappend="${step.done || step.active} ? 'bg-green-500 text-white border-2 border-green-600' : 'bg-gray-300 text-gray-600 border-2 border-gray-400'"
+                     class="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-500 shadow-md">
+                    <i th:classappend="${step.icon}" class="text-lg"></i>
+                </div>
+                <span class="mt-2 text-xs font-medium" th:text="${step.label}"></span>
+            </div>
+        </div>
+
+        <div class="absolute top-5 left-10 right-10 h-1 bg-gray-300 -z-10 rounded-full">
+            <div th:style="'width: ' + ${progressWidth} + '%'"
+                 class="h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-700 rounded-full"></div>
+        </div>
+    </div>
+
+    <p class="mt-5 text-center font-semibold text-sm"
+       th:text="${currentMessage}"
+       th:classappend="${order.status == 'DELIVERED' ? 'text-green-700' : 'text-blue-700'}">
+    </p>
+
+    <div class="mt-3 text-center text-xs text-gray-600 space-y-1">
+        <div>
+            <span class="font-medium">Phương thức:</span>
+            <span th:text="${order.paymentMethod}"></span>
+        </div>
+        <div th:if="${order.paymentMethod == 'COD'}" class="text-orange-600 font-medium">
+            Thu tiền khi giao hàng
+        </div>
+        <div th:if="${order.paymentMethod == 'VNPAY' && order.paymentStatus == 'PAID'}" class="text-green-600 font-medium">
+            Đã thanh toán online
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const steps = [
+        { label: 'Đặt hàng', icon: 'fas fa-shopping-cart', key: 'PENDING' },
+        { label: 'Thanh toán', icon: 'fas fa-credit-card', key: 'PAID' },
+        { label: 'Duyệt đơn', icon: 'fas fa-check-circle', key: 'APPROVED' },
+        { label: 'Đang giao', icon: 'fas fa-truck', key: 'SHIPPING' },
+        { label: 'Hoàn tất', icon: 'fas fa-gift', key: 'DELIVERED' }
+    ];
+
+    function getStepStatus(order) {
+        const status = (order.status || '').toUpperCase();
+        const paymentStatus = (order.paymentStatus || '').toUpperCase();
+        const method = order.paymentMethod || '';
+
+        let currentStep = 0;
+        let messages = [];
+
+        if (status === 'PENDING') {
+            currentStep = 0;
+            messages.push("Đơn hàng đã được tạo");
+        }
+
+        if (paymentStatus === 'PAID' || paymentStatus === 'COD_PAID') {
+            currentStep = 1;
+            messages.push(method === 'COD' ? "Chờ thanh toán khi nhận hàng" : "Đã thanh toán qua VNPay");
+        }
+
+        if (['APPROVED', 'SHIPPING', 'DELIVERED'].includes(status)) {
+            currentStep = Math.max(currentStep, 2);
+            messages.push("Đã được Admin duyệt");
+        }
+
+        if (status === 'SHIPPING') {
+            currentStep = 3;
+            messages.push("Shipper đang giao hàng");
+        }
+
+        if (status === 'DELIVERED') {
+            currentStep = 4;
+            messages.push(method === 'COD' ? "Đã nhận hàng & thanh toán COD" : "Đã nhận hàng");
+        }
+
+        const progressWidth = (currentStep / (steps.length - 1)) * 100;
+
+        steps.forEach((s, i) => {
+            s.done = i < currentStep;
+            s.active = i === currentStep;
+        });
+
+        return { steps, progressWidth, currentMessage: messages[messages.length - 1] || 'Đang xử lý...' };
+    }
+
+    // CHỈ GIỮ LẠI DÒNG NÀY
+    const result = getStepStatus(/*[[${order}]]*/ { status: 'PENDING' });
+    /*]]>*/
+</script>

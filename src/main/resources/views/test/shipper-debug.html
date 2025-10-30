@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shipper Debug</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold mb-6">Shipper API Debug</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Test API Response</h2>
+            <button onclick="testApi()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Test API
+            </button>
+            
+            <div id="result" class="mt-4 p-4 bg-gray-100 rounded hidden">
+                <h3 class="font-semibold mb-2">API Response:</h3>
+                <pre id="api-response" class="text-sm overflow-auto"></pre>
+            </div>
+            
+            <div id="orders-display" class="mt-4 hidden">
+                <h3 class="font-semibold mb-2">Orders Display:</h3>
+                <div id="orders-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testApi() {
+            try {
+                console.log('Testing API...');
+                const response = await fetch('/api/shipper/orders/available?page=0&size=5');
+                const data = await response.json();
+                
+                console.log('API Response:', data);
+                
+                // Hiển thị raw response
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('api-response').textContent = JSON.stringify(data, null, 2);
+                
+                // Test xử lý orders
+                if (data.success) {
+                    const orders = data.data?.items || data.data || [];
+                    console.log('Orders array:', orders);
+                    console.log('Orders length:', orders.length);
+                    console.log('Is array:', Array.isArray(orders));
+                    
+                    if (Array.isArray(orders)) {
+                        displayOrders(orders);
+                    } else {
+                        console.error('Orders is not an array:', typeof orders);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('api-response').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        function displayOrders(orders) {
+            const container = document.getElementById('orders-list');
+            const display = document.getElementById('orders-display');
+            
+            if (orders.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">Không có đơn hàng nào</p>';
+            } else {
+                container.innerHTML = orders.map(order => `
+                    <div class="border p-3 mb-2 rounded">
+                        <p><strong>Mã đơn:</strong> ${order.orderNumber || order.id}</p>
+                        <p><strong>Khách hàng:</strong> ${order.username || 'N/A'}</p>
+                        <p><strong>Trạng thái:</strong> ${order.status || 'N/A'}</p>
+                        <p><strong>Tổng tiền:</strong> ${order.totalAmount || 0} ₫</p>
+                    </div>
+                `).join('');
+            }
+            
+            display.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

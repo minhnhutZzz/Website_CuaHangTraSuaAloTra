@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Khuyến mãi - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/admin/promotions.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{layouts/sidebar :: sidebar}"></div>
+    
+    <div class="main-content">
+        <div th:replace="~{layouts/header :: header}"></div>
+        
+        <div class="container-fluid py-4">
+            <!-- Header Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">
+                                <i class="fas fa-percentage text-primary me-2"></i>
+                                Quản lý Khuyến mãi
+                            </h2>
+                            <p class="text-muted mb-0">Quản lý các chương trình khuyến mãi và giảm giá</p>
+                        </div>
+                        <a href="/admin/promotions/create" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Thêm Khuyến mãi
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Search and Filter Section -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <form method="get" class="d-flex">
+                        <div class="input-group search-box">
+                            <input type="text" 
+                                   class="form-control" 
+                                   name="search" 
+                                   th:value="${search}"
+                                   placeholder="Tìm kiếm theo tên khuyến mãi...">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-sort me-2"></i>
+                                Sắp xếp
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="?sortBy=name&sortDir=asc">Tên A-Z</a></li>
+                                <li><a class="dropdown-item" href="?sortBy=name&sortDir=desc">Tên Z-A</a></li>
+                                <li><a class="dropdown-item" href="?sortBy=discountPercent&sortDir=desc">Giảm giá cao nhất</a></li>
+                                <li><a class="dropdown-item" href="?sortBy=startDate&sortDir=desc">Mới nhất</a></li>
+                            </ul>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-filter me-2"></i>
+                                Hiển thị
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="?size=5">5 mục/trang</a></li>
+                                <li><a class="dropdown-item" href="?size=10">10 mục/trang</a></li>
+                                <li><a class="dropdown-item" href="?size=20">20 mục/trang</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stats-card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" th:text="${totalElements}">0</h4>
+                                    <p class="card-text">Tổng khuyến mãi</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-percentage fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" th:text="${#lists.size(promotions)}">0</h4>
+                                    <p class="card-text">Đang hiển thị</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-eye fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" th:text="${totalPages}">0</h4>
+                                    <p class="card-text">Tổng trang</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-file-alt fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h4 class="card-title" th:text="${currentPage + 1}">1</h4>
+                                    <p class="card-text">Trang hiện tại</p>
+                                </div>
+                                <div class="align-self-center">
+                                    <i class="fas fa-bookmark fa-2x"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Promotions List -->
+            <div class="row" th:if="${#lists.isEmpty(promotions)}">
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="fas fa-percentage fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">Chưa có khuyến mãi nào</h4>
+                        <p class="text-muted">Hãy tạo khuyến mãi đầu tiên để bắt đầu</p>
+                        <a href="/admin/promotions/create" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Thêm Khuyến mãi
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" th:unless="${#lists.isEmpty(promotions)}">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>
+                                Danh sách Khuyến mãi
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Tên khuyến mãi</th>
+                                            <th>Mô tả</th>
+                                            <th>Giảm giá</th>
+                                            <th>Thời gian</th>
+                                            <th>Trạng thái</th>
+                                            <th>Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="promotion : ${promotions}">
+                                            <td>
+                                                <div class="fw-bold" th:text="${promotion.name}"></div>
+                                            </td>
+                                            <td>
+                                                <div class="text-muted" 
+                                                     th:text="${promotion.description != null ? promotion.description : 'Không có mô tả'}"
+                                                     style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge discount-badge" 
+                                                      th:text="${promotion.discountPercent} + '%'">
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="small">
+                                                    <div><strong>Từ:</strong> <span th:text="${#temporals.format(promotion.startDate, 'dd/MM/yyyy HH:mm')}"></span></div>
+                                                    <div><strong>Đến:</strong> <span th:text="${#temporals.format(promotion.endDate, 'dd/MM/yyyy HH:mm')}"></span></div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge status-badge" 
+                                                      th:class="${promotion.isActive} ? 'bg-success' : 'bg-secondary'"
+                                                      th:text="${promotion.isActive} ? 'Hoạt động' : 'Tạm dừng'">
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a th:href="@{/admin/promotions/edit/{id}(id=${promotion.id})}" 
+                                                       class="btn btn-sm btn-outline-primary" 
+                                                       title="Chỉnh sửa">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-outline-danger" 
+                                                            title="Xóa"
+                                                            th:onclick="'deletePromotion(\'' + ${promotion.id} + '\', \'' + ${promotion.name} + '\')'">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="row mt-4" th:if="${totalPages > 1}">
+                <div class="col-12">
+                    <nav aria-label="Promotions pagination">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${isFirst} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/promotions(page=${currentPage - 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            
+                            <li th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}" 
+                                class="page-item" 
+                                th:classappend="${pageNum == currentPage} ? 'active'">
+                                <a class="page-link" 
+                                   th:href="@{/admin/promotions(page=${pageNum}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}"
+                                   th:text="${pageNum + 1}">
+                                </a>
+                            </li>
+                            
+                            <li class="page-item" th:classappend="${isLast} ? 'disabled'">
+                                <a class="page-link" th:href="@{/admin/promotions(page=${currentPage + 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir}, search=${search})}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        Xác nhận xóa
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa khuyến mãi <strong id="promotionName"></strong>?</p>
+                    <p class="text-muted small">Hành động này không thể hoàn tác.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <form id="deleteForm" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>
+                            Xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function deletePromotion(id, name) {
+            document.getElementById('promotionName').textContent = name;
+            document.getElementById('deleteForm').action = '/admin/promotions/delete/' + id;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        }
+        
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

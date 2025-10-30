@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Admin Sidebar - TRÀ SỮA MONA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-center mb-6 text-[#1f2d3d]">
+                <i class="fas fa-bars text-indigo-600 mr-2"></i>
+                Demo Admin Sidebar - Quản Lý Đơn Hàng
+            </h1>
+            
+            <!-- Sidebar Preview -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-[#1f2d3d]">Sidebar Menu</h2>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <div class="space-y-2">
+                        <!-- Dashboard -->
+                        <div class="flex items-center p-3 bg-blue-50 rounded-lg">
+                            <i class="fas fa-tachometer-alt text-blue-600 mr-3"></i>
+                            <span class="text-gray-800">Dashboard</span>
+                        </div>
+                        
+                        <!-- Quản lý bán hàng -->
+                        <div class="text-sm text-gray-500 font-medium mt-4 mb-2">Quản lý bán hàng</div>
+                        <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fas fa-tags text-green-600 mr-3"></i>
+                            <span class="text-gray-800">Danh mục sản phẩm</span>
+                        </div>
+                        <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fas fa-box text-green-600 mr-3"></i>
+                            <span class="text-gray-800">Danh sách sản phẩm</span>
+                        </div>
+                        <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fas fa-plus text-green-600 mr-3"></i>
+                            <span class="text-gray-800">Thêm sản phẩm</span>
+                        </div>
+                        <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fas fa-plus-circle text-orange-600 mr-3"></i>
+                            <span class="text-gray-800">Thêm khuyến mãi</span>
+                        </div>
+                        <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fas fa-tags text-orange-600 mr-3"></i>
+                            <span class="text-gray-800">Áp dụng khuyến mãi</span>
+                        </div>
+                        
+                        <!-- Quản lý đơn hàng - MỚI -->
+                        <div class="text-sm text-gray-500 font-medium mt-4 mb-2">Quản lý đơn hàng</div>
+                        <div class="flex items-center p-3 bg-indigo-50 rounded-lg border-l-4 border-indigo-500">
+                            <i class="fas fa-shopping-cart text-indigo-600 mr-3"></i>
+                            <span class="text-gray-800 font-medium">Quản lý đơn hàng</span>
+                            <span class="ml-auto bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">MỚI</span>
+                        </div>
+                        
+                        <!-- Quản lý tài khoản -->
+                        <div class="text-sm text-gray-500 font-medium mt-4 mb-2">Quản lý tài khoản</div>
+                        <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fas fa-users text-purple-500 mr-3"></i>
+                            <span class="text-gray-800">Danh sách người dùng</span>
+                        </div>
+                        <div class="flex items-center p-3 hover:bg-gray-50 rounded-lg">
+                            <i class="fas fa-user-friends text-purple-500 mr-3"></i>
+                            <span class="text-gray-800">Danh sách khách hàng</span>
+                        </div>
+                        
+                        <!-- Đăng xuất -->
+                        <div class="flex items-center p-3 hover:bg-red-50 rounded-lg mt-4">
+                            <i class="fas fa-sign-out-alt text-red-500 mr-3"></i>
+                            <span class="text-gray-800">Đăng xuất</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dashboard Cards Preview -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-[#1f2d3d]">Dashboard Cards</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="flex flex-col items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group">
+                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-plus text-white text-xl"></i>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">Thêm trà sữa</p>
+                    </div>
+                    
+                    <div class="flex flex-col items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors group">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-coffee text-white text-xl"></i>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">Quản lý trà sữa</p>
+                    </div>
+                    
+                    <div class="flex flex-col items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors group">
+                        <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-tags text-white text-xl"></i>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">Danh mục trà sữa</p>
+                    </div>
+                    
+                    <div class="flex flex-col items-center p-4 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors group">
+                        <div class="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <i class="fas fa-shopping-cart text-white text-xl"></i>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900">Quản lý đơn hàng</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features -->
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-8">
+                <h3 class="font-semibold text-green-900 mb-2">✅ Đã cập nhật:</h3>
+                <ul class="text-sm text-green-700 space-y-1">
+                    <li>• Thêm "Quản lý đơn hàng" vào sidebar admin</li>
+                    <li>• Icon: fas fa-shopping-cart với màu indigo-600</li>
+                    <li>• Link: /admin/orders</li>
+                    <li>• Cập nhật dashboard: "Quản lý trà sữa", "Danh mục trà sữa"</li>
+                    <li>• Icon trà sữa: fas fa-coffee thay vì fas fa-tshirt</li>
+                </ul>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="text-center">
+                <a href="/auth/dashboard" class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors mr-4">
+                    <i class="fas fa-tachometer-alt mr-2"></i>
+                    Xem Dashboard Admin
+                </a>
+                <a href="/admin/orders" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-shopping-cart mr-2"></i>
+                    Xem Quản Lý Đơn Hàng
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

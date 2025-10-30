@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Đánh Giá - TRÀ SỮA MONA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-center mb-6 text-[#1f2d3d]">
+                <i class="fas fa-star text-yellow-500 mr-2"></i>
+                Demo Phần Đánh Giá - Không Avatar
+            </h1>
+            
+            <!-- Before/After Comparison -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Before -->
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-red-900 mb-4 flex items-center">
+                        <i class="fas fa-times-circle mr-2"></i>
+                        Trước (Có Avatar)
+                    </h3>
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">M</div>
+                            <div class="ml-4">
+                                <h4 class="font-bold text-gray-800">Minh Anh</h4>
+                                <div class="flex text-yellow-400">
+                                    ★★★★★
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 mb-4">"Trà sữa truyền thống ngon tuyệt! Vị đậm đà, trân châu dai giòn."</p>
+                        <div class="text-sm text-gray-500">2 ngày trước</div>
+                    </div>
+                </div>
+                
+                <!-- After -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-green-900 mb-4 flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Sau (Không Avatar)
+                    </h3>
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-bold text-gray-800">Minh Anh</h4>
+                                <div class="flex text-yellow-400">
+                                    ★★★★★
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500">2 ngày trước</div>
+                        </div>
+                        <p class="text-gray-600">"Trà sữa truyền thống ngon tuyệt! Vị đậm đà, trân châu dai giòn."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sample Reviews -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-[#1f2d3d]">Mẫu Đánh Giá Mới</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Review 1 -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-bold text-gray-800">Minh Anh</h4>
+                                <div class="flex text-yellow-400">
+                                    ★★★★★
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500">2 ngày trước</div>
+                        </div>
+                        <p class="text-gray-600">"Trà sữa truyền thống ngon tuyệt! Vị đậm đà, trân châu dai giòn. Giao hàng nhanh, đóng gói cẩn thận. Sẽ mua lại!"</p>
+                    </div>
+                    
+                    <!-- Review 2 -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-bold text-gray-800">Thu Hà</h4>
+                                <div class="flex text-yellow-400">
+                                    ★★★★★
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500">1 tuần trước</div>
+                        </div>
+                        <p class="text-gray-600">"Matcha latte thơm ngon, vị đắng nhẹ vừa phải. Topping kem cheese béo ngậy. Rất hài lòng!"</p>
+                    </div>
+                    
+                    <!-- Review 3 -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h4 class="font-bold text-gray-800">Lan Anh</h4>
+                                <div class="flex text-yellow-400">
+                                    ★★★★☆
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500">3 ngày trước</div>
+                        </div>
+                        <p class="text-gray-600">"Trà sữa trái cây tươi mát, vị cam chua ngọt vừa phải. Đá vừa đủ, không quá ngọt. Tư vấn nhiệt tình."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Features -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+                <h3 class="font-semibold text-blue-900 mb-2">✅ Đã cập nhật:</h3>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• Bỏ avatar hình tròn trong phần đánh giá</li>
+                    <li>• Chỉ hiển thị: Tên, Ngày, Sao, Nội dung đánh giá</li>
+                    <li>• Layout gọn gàng, dễ đọc hơn</li>
+                    <li>• Cập nhật nội dung đánh giá phù hợp với trà sữa</li>
+                </ul>
+            </div>
+            
+            <!-- Navigation -->
+            <div class="text-center">
+                <a href="/" class="bg-[#cb5439] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#a8442f] transition-colors mr-4">
+                    <i class="fas fa-home mr-2"></i>
+                    Xem Trang Chủ
+                </a>
+                <a href="/products/detail/test" class="bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-coffee mr-2"></i>
+                    Xem Chi Tiết Sản Phẩm
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

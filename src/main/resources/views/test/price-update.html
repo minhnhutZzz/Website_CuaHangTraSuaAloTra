@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cập nhật Giá</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .product-card {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .product-card:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .price-original {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+        .price-discounted {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .promotion-card {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .promotion-card:hover {
+            border-color: #28a745;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .promotion-card.selected {
+            border-color: #28a745;
+            background-color: #f8fff9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-5">
+            <i class="fas fa-calculator text-primary me-2"></i>
+            Test Cập nhật Giá Sản phẩm
+        </h1>
+        
+        <div class="row">
+            <!-- Promotions -->
+            <div class="col-md-4">
+                <h3>Khuyến mãi có sẵn</h3>
+                <div th:each="promotion : ${promotions}" 
+                     class="promotion-card card mb-3" 
+                     th:data-promotion-id="${promotion.id}"
+                     th:data-discount="${promotion.discountPercent}"
+                     onclick="selectPromotion(this)">
+                    <div class="card-body">
+                        <h5 th:text="${promotion.name}">Promotion Name</h5>
+                        <p class="text-muted" th:text="${promotion.description}">Description</p>
+                        <span class="badge bg-danger" th:text="${promotion.discountPercent} + '%'"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Products -->
+            <div class="col-md-8">
+                <h3>Sản phẩm hiện tại</h3>
+                <div class="row">
+                    <div th:each="product : ${products}" 
+                         class="col-md-6 mb-3">
+                        <div class="product-card card h-100">
+                            <div class="card-body">
+                                <h5 th:text="${product.name}">Product Name</h5>
+                                <p class="text-muted" th:text="${product.description}">Description</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="price-original" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">Original Price</div>
+                                        <div class="price-discounted" th:id="'discounted-' + ${product.id}" style="display: none;">Discounted Price</div>
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" 
+                                            th:onclick="'applyPromotionToProduct(\'' + ${product.id} + '\')'"
+                                            th:id="'apply-btn-' + ${product.id}">
+                                        Áp dụng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle me-2"></i>Hướng dẫn Test</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li><strong>Chọn khuyến mãi:</strong> Click vào một khuyến mãi từ danh sách bên trái</li>
+                            <li><strong>Áp dụng cho sản phẩm:</strong> Click nút "Áp dụng" bên cạnh sản phẩm</li>
+                            <li><strong>Kiểm tra giá:</strong> Giá sản phẩm sẽ được cập nhật trong database</li>
+                            <li><strong>Refresh trang:</strong> Để xem giá đã được cập nhật</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedPromotion = null;
+
+        function selectPromotion(element) {
+            // Remove previous selection
+            document.querySelectorAll('.promotion-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Add selection to clicked element
+            element.classList.add('selected');
+            
+            // Store selected promotion data
+            selectedPromotion = {
+                id: element.dataset.promotionId,
+                discount: parseFloat(element.dataset.discount)
+            };
+            
+            console.log('Selected promotion:', selectedPromotion);
+        }
+
+        function applyPromotionToProduct(productId) {
+            if (!selectedPromotion) {
+                alert('Vui lòng chọn khuyến mãi trước!');
+                return;
+            }
+            
+            if (confirm(`Áp dụng khuyến mãi ${selectedPromotion.discount}% cho sản phẩm này?`)) {
+                // Show loading
+                const applyBtn = document.getElementById('apply-btn-' + productId);
+                const originalText = applyBtn.innerHTML;
+                applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang áp dụng...';
+                applyBtn.disabled = true;
+                
+                // Call API
+                fetch('/api/promotion-products/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        promotionId: selectedPromotion.id,
+                        productId: productId
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Áp dụng khuyến mãi thành công! Giá sản phẩm đã được cập nhật.');
+                        
+                        // Update UI to show discounted price
+                        const originalPrice = document.querySelector(`[onclick*="${productId}"]`).querySelector('.price-original');
+                        const discountedPrice = document.getElementById('discounted-' + productId);
+                        const currentPrice = parseFloat(originalPrice.textContent.replace(/[^\d]/g, ''));
+                        const newPrice = currentPrice * (1 - selectedPromotion.discount / 100);
+                        
+                        discountedPrice.textContent = new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                        }).format(newPrice);
+                        discountedPrice.style.display = 'block';
+                        
+                        applyBtn.innerHTML = '<i class="fas fa-check me-1"></i>Đã áp dụng';
+                        applyBtn.classList.remove('btn-primary');
+                        applyBtn.classList.add('btn-success');
+                    } else {
+                        alert('Lỗi: ' + (data.message || 'Không thể áp dụng khuyến mãi'));
+                        applyBtn.innerHTML = originalText;
+                        applyBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi áp dụng khuyến mãi!');
+                    applyBtn.innerHTML = originalText;
+                    applyBtn.disabled = false;
+                });
+            }
+        }
+    </script>
+</body>
+</html>

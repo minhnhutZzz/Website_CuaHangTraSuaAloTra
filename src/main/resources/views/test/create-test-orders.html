@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Đơn Hàng Test - TRÀ SỮA MONA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h1 class="text-2xl font-bold text-center mb-6 text-[#1f2d3d]">
+                <i class="fas fa-plus-circle text-green-600 mr-2"></i>
+                Tạo Đơn Hàng Test
+            </h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Create Orders -->
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-green-900 mb-4">
+                        <i class="fas fa-plus mr-2"></i>
+                        Tạo Đơn Hàng Test
+                    </h3>
+                    <p class="text-sm text-green-700 mb-4">
+                        Tạo các đơn hàng test với các trạng thái khác nhau để kiểm tra thông báo.
+                    </p>
+                    <button onclick="createTestOrders()" 
+                            class="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>
+                        Tạo Đơn Hàng Test
+                    </button>
+                </div>
+                
+                <!-- Test API -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-blue-900 mb-4">
+                        <i class="fas fa-flask mr-2"></i>
+                        Test API
+                    </h3>
+                    <p class="text-sm text-blue-700 mb-4">
+                        Kiểm tra API customer orders hoạt động đúng không.
+                    </p>
+                    <button onclick="testAPI()" 
+                            class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-play mr-2"></i>
+                        Test API
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results -->
+            <div id="results" class="mt-6 hidden">
+                <h3 class="font-semibold text-gray-800 mb-4">Kết Quả:</h3>
+                <div id="resultContent" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <!-- Results will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showResults(content) {
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('resultContent').innerHTML = content;
+        }
+        
+        async function createTestOrders() {
+            try {
+                showResults('<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang tạo đơn hàng test...</p></div>');
+                
+                // Gọi API tạo đơn hàng thực tế
+                const response = await fetch('/shipper-test/create-test-orders-api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResults(`
+                        <div class="text-green-700">
+                            <i class="fas fa-check-circle text-2xl mb-2"></i>
+                            <p class="font-semibold">Tạo đơn hàng test thành công!</p>
+                            <p class="text-sm mt-2">Đã tạo ${data.orderCount} đơn hàng với sessionId: ${data.sessionId}</p>
+                            <div class="mt-4 space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <span>PENDING:</span>
+                                    <span class="font-semibold">1 đơn</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>APPROVED:</span>
+                                    <span class="font-semibold">1 đơn</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>SHIPPING:</span>
+                                    <span class="font-semibold">1 đơn</span>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <span>DELIVERED:</span>
+                                    <span class="font-semibold">1 đơn</span>
+                                </div>
+                            </div>
+                            <div class="mt-4 p-3 bg-blue-50 rounded">
+                                <p class="text-sm text-blue-700">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    SessionId: <code class="bg-white px-2 py-1 rounded">${data.sessionId}</code>
+                                </p>
+                                <p class="text-xs text-blue-600 mt-2">
+                                    Sử dụng sessionId này để test thông báo đơn hàng.
+                                </p>
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    throw new Error(data.message);
+                }
+                
+            } catch (error) {
+                showResults(`
+                    <div class="text-red-700">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p class="font-semibold">Lỗi tạo đơn hàng test</p>
+                        <p class="text-sm">${error.message}</p>
+                    </div>
+                `);
+            }
+        }
+        
+        async function testAPI() {
+            try {
+                showResults('<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><p>Đang test API...</p></div>');
+                
+                const sessionId = 'session_' + Date.now();
+                
+                // Test count API
+                const countResponse = await fetch(`/api/customer/orders/count?sessionId=${sessionId}`);
+                const countData = await countResponse.json();
+                
+                // Test recent API
+                const recentResponse = await fetch(`/api/customer/orders/recent?sessionId=${sessionId}&limit=5`);
+                const recentData = await recentResponse.json();
+                
+                let result = `
+                    <div class="space-y-4">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <h4 class="font-semibold text-green-900 mb-2">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                API Count Test
+                            </h4>
+                            <p class="text-sm text-green-700">Status: ${countResponse.status}</p>
+                            <pre class="text-xs bg-white p-2 rounded mt-2 overflow-x-auto">${JSON.stringify(countData, null, 2)}</pre>
+                        </div>
+                        
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <h4 class="font-semibold text-blue-900 mb-2">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                API Recent Test
+                            </h4>
+                            <p class="text-sm text-blue-700">Status: ${recentResponse.status}</p>
+                            <pre class="text-xs bg-white p-2 rounded mt-2 overflow-x-auto">${JSON.stringify(recentData, null, 2)}</pre>
+                        </div>
+                    </div>
+                `;
+                
+                showResults(result);
+                
+            } catch (error) {
+                showResults(`
+                    <div class="text-red-700">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <p class="font-semibold">Lỗi test API</p>
+                        <p class="text-sm">${error.message}</p>
+                    </div>
+                `);
+            }
+        }
+    </script>
+</body>
+</html>

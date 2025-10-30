@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Áp dụng Khuyến mãi - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/admin/promotions.css" rel="stylesheet">
+    <style>
+        .promotion-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .promotion-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .promotion-card.selected {
+            border-color: #007bff;
+            background-color: #f8f9ff;
+        }
+        .product-card {
+            transition: all 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .product-checkbox {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+        .selected-products {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .search-box {
+            position: relative;
+        }
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .search-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f8f9fa;
+        }
+        .search-item:hover {
+            background-color: #f8f9fa;
+        }
+        .search-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="fas fa-tags text-primary me-2"></i>
+                            Áp dụng Khuyến mãi
+                        </h2>
+                        <p class="text-muted mb-0">Chọn khuyến mãi và áp dụng cho sản phẩm</p>
+                    </div>
+                    <a href="/admin/promotions" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <!-- Promotion Selection -->
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-percentage me-2"></i>
+                            Chọn Khuyến mãi
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="search-box mb-3">
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="promotionSearch" 
+                                   placeholder="Tìm kiếm khuyến mãi...">
+                            <div class="search-results" id="promotionSearchResults"></div>
+                        </div>
+                        
+                        <div class="promotion-list" style="max-height: 400px; overflow-y: auto;">
+                            <div th:each="promotion : ${activePromotions}" 
+                                 class="promotion-card card mb-2 promotion-item" 
+                                 th:data-promotion-id="${promotion.id}"
+                                 th:onclick="'selectPromotion(\'' + ${promotion.id} + '\')'">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="card-title mb-1" th:text="${promotion.name}"></h6>
+                                            <p class="card-text small text-muted mb-1" th:text="${promotion.description}"></p>
+                                            <div class="d-flex gap-2">
+                                                <span class="badge bg-danger" th:text="${promotion.discountPercent} + '%'"></span>
+                                                <span class="badge bg-success" th:text="${promotion.isActive} ? 'Hoạt động' : 'Tạm dừng'"></span>
+                                            </div>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-muted">
+                                                <div th:text="${#temporals.format(promotion.startDate, 'dd/MM/yyyy')}"></div>
+                                                <div th:text="${#temporals.format(promotion.endDate, 'dd/MM/yyyy')}"></div>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Selection -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-box me-2"></i>
+                            Chọn Sản phẩm
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Selected Promotion Info -->
+                        <div th:if="${selectedPromotion}" class="alert alert-info mb-3">
+                            <h6 class="mb-1">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Khuyến mãi đã chọn: <span th:text="${selectedPromotion.name}"></span>
+                            </h6>
+                            <small>
+                                Giảm giá: <span th:text="${selectedPromotion.discountPercent}"></span>% | 
+                                Thời gian: <span th:text="${#temporals.format(selectedPromotion.startDate, 'dd/MM/yyyy')}"></span> - 
+                                <span th:text="${#temporals.format(selectedPromotion.endDate, 'dd/MM/yyyy')}"></span>
+                            </small>
+                        </div>
+
+                        <!-- Search and Filter -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="search-box">
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="productSearch" 
+                                           placeholder="Tìm kiếm sản phẩm...">
+                                    <div class="search-results" id="productSearchResults"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-primary" onclick="selectAllProducts()">
+                                        <i class="fas fa-check-square me-2"></i>
+                                        Chọn tất cả
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="clearSelection()">
+                                        <i class="fas fa-square me-2"></i>
+                                        Bỏ chọn
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product List -->
+                        <div class="row" id="productList">
+                            <div th:each="product : ${availableProducts}" 
+                                 class="col-md-6 col-lg-4 mb-3 product-item" 
+                                 th:data-product-id="${product.id}">
+                                <div class="card product-card h-100">
+                                    <div class="position-relative">
+                                        <input type="checkbox" 
+                                               class="form-check-input product-checkbox" 
+                                               th:id="'product_' + ${product.id}"
+                                               th:value="${product.id}">
+                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                             style="height: 120px;">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <h6 class="card-title" th:text="${product.name}"></h6>
+                                        <p class="card-text small text-muted" th:text="${product.description}"></p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="text-primary fw-bold" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                                            <small class="text-muted" th:text="${product.category?.name}"></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Applied Products -->
+                        <div th:if="${appliedProducts != null and !appliedProducts.isEmpty()}" class="mt-4">
+                            <h6 class="text-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Sản phẩm đã áp dụng khuyến mãi
+                            </h6>
+                            <div class="selected-products">
+                                <div th:each="appliedProduct : ${appliedProducts}" 
+                                     class="card mb-2">
+                                    <div class="card-body p-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span th:text="${appliedProduct.product?.name}"></span>
+                                                <small class="text-muted ms-2" th:text="'ID: ' + ${appliedProduct.productId}"></small>
+                                            </div>
+                                            <div>
+                                                <span class="badge bg-success me-2">Đã áp dụng</span>
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        th:onclick="'removeProduct(\'' + ${appliedProduct.productId} + '\')'">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div th:if="${selectedPromotion}" class="mt-4">
+                            <form id="applyPromotionForm" method="post" action="/admin/promotion-apply/apply">
+                                <input type="hidden" name="promotionId" th:value="${selectedPromotion.id}">
+                                <input type="hidden" name="productIds" id="selectedProductIds">
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary" onclick="applyPromotion()">
+                                        <i class="fas fa-tags me-2"></i>
+                                        Áp dụng khuyến mãi
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="clearSelection()">
+                                        <i class="fas fa-undo me-2"></i>
+                                        Làm mới
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedPromotionId = null;
+        let selectedProductIds = new Set();
+
+        // Select promotion
+        function selectPromotion(promotionId) {
+            selectedPromotionId = promotionId;
+            
+            // Update UI
+            document.querySelectorAll('.promotion-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`[data-promotion-id="${promotionId}"]`).classList.add('selected');
+            
+            // Reload page with selected promotion
+            window.location.href = `/admin/promotion-apply?promotionId=${promotionId}`;
+        }
+
+        // Select all products
+        function selectAllProducts() {
+            document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+                checkbox.checked = true;
+                selectedProductIds.add(checkbox.value);
+            });
+            updateSelectedCount();
+        }
+
+        // Clear selection
+        function clearSelection() {
+            document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            selectedProductIds.clear();
+            updateSelectedCount();
+        }
+
+        // Update selected count
+        function updateSelectedCount() {
+            const selectedCount = document.querySelectorAll('.product-checkbox:checked').length;
+            const applyBtn = document.querySelector('#applyPromotionForm button[type="submit"]');
+            if (applyBtn) {
+                applyBtn.innerHTML = `<i class="fas fa-tags me-2"></i>Áp dụng khuyến mãi (${selectedCount})`;
+                applyBtn.disabled = selectedCount === 0;
+            }
+        }
+
+        // Apply promotion
+        function applyPromotion() {
+            const checkedBoxes = document.querySelectorAll('.product-checkbox:checked');
+            const productIds = Array.from(checkedBoxes).map(cb => cb.value);
+            
+            if (productIds.length === 0) {
+                alert('Vui lòng chọn ít nhất một sản phẩm!');
+                return;
+            }
+            
+            document.getElementById('selectedProductIds').value = productIds.join(',');
+            document.getElementById('applyPromotionForm').submit();
+        }
+
+        // Remove product from applied list
+        function removeProduct(productId) {
+            if (confirm('Bạn có chắc chắn muốn hủy áp dụng khuyến mãi cho sản phẩm này?')) {
+                // Create form to remove product
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.action = '/admin/promotion-apply/remove';
+                
+                const promotionIdInput = document.createElement('input');
+                promotionIdInput.type = 'hidden';
+                promotionIdInput.name = 'promotionId';
+                promotionIdInput.value = selectedPromotionId;
+                
+                const productIdsInput = document.createElement('input');
+                productIdsInput.type = 'hidden';
+                productIdsInput.name = 'productIds';
+                productIdsInput.value = productId;
+                
+                form.appendChild(promotionIdInput);
+                form.appendChild(productIdsInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+        // Product search
+        document.getElementById('productSearch').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const productItems = document.querySelectorAll('.product-item');
+            
+            productItems.forEach(item => {
+                const productName = item.querySelector('.card-title').textContent.toLowerCase();
+                const productDesc = item.querySelector('.card-text').textContent.toLowerCase();
+                
+                if (productName.includes(searchTerm) || productDesc.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Product checkbox change
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('product-checkbox')) {
+                if (e.target.checked) {
+                    selectedProductIds.add(e.target.value);
+                } else {
+                    selectedProductIds.delete(e.target.value);
+                }
+                updateSelectedCount();
+            }
+        });
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

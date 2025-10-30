@@ -1,0 +1,455 @@
+<!-- src/main/resources/templates/admin-orders-updated.html -->
+<div th:replace="~{layouts/authLayout :: layout('Quản lý đơn hàng', ~{::content})}">
+    <div th:fragment="content">
+        <div class="p-6">
+            <!-- Header -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-4xl font-bold text-gray-900 mb-2">Quản lý đơn hàng</h1>
+                        <p class="text-gray-600 text-lg">Theo dõi và quản lý tất cả đơn hàng</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="refreshOrders()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-sync-alt mr-2"></i>Làm mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="mb-6">
+                <div class="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                    <button onclick="filterOrders('all')" class="filter-tab active px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        Tất cả
+                    </button>
+                    <button onclick="filterOrders('pending')" class="filter-tab px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        Chưa duyệt
+                    </button>
+                    <button onclick="filterOrders('approved')" class="filter-tab px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        Đã duyệt
+                    </button>
+                    <button onclick="filterOrders('shipping')" class="filter-tab px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        Đang giao hàng
+                    </button>
+                    <button onclick="filterOrders('delivered')" class="filter-tab px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        Đã nhận hàng
+                    </button>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã đơn hàng</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số tiền</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phương thức</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="bg-white divide-y divide-gray-200">
+                        <!-- Orders will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination" class="mt-6 flex items-center justify-between">
+                <!-- Pagination will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Detail Modal -->
+<div id="orderDetailModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm" onclick="closeOrderDetailModal()"></div>
+    <div class="relative flex items-center justify-center min-h-screen p-4" onclick="event.stopPropagation()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-900">Chi tiết đơn hàng</h2>
+                <button onclick="closeOrderDetailModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div id="orderDetailContent" class="p-6">
+                <!-- Order details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentFilter = 'all';
+    let currentPage = 0;
+    let pageSize = 10;
+
+    // Filter orders
+    function filterOrders(filter) {
+        currentFilter = filter;
+        currentPage = 0;
+
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.classList.remove('active', 'bg-blue-500', 'text-white');
+            tab.classList.add('text-gray-700', 'hover:bg-gray-200');
+        });
+
+        event.target.classList.add('active', 'bg-blue-500', 'text-white');
+        event.target.classList.remove('text-gray-700', 'hover:bg-gray-200');
+
+        loadOrders();
+    }
+
+    // Load orders
+    async function loadOrders() {
+        try {
+            const response = await fetch(`/api/admin/orders?filter=${currentFilter}&page=${currentPage}&size=${pageSize}`);
+            const result = await response.json();
+
+            if (result.success) {
+                renderOrders(result.data.items);
+                renderPagination(result.data);
+            } else {
+                console.error('Error loading orders:', result.message);
+            }
+        } catch (error) {
+            console.error('Error loading orders:', error);
+        }
+    }
+
+    // Render orders table
+    function renderOrders(orders) {
+        const tbody = document.getElementById('ordersTableBody');
+
+        if (orders.length === 0) {
+            tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+            <i class="fas fa-inbox text-4xl mb-4"></i>
+            <p>Không có đơn hàng nào</p>
+          </td>
+        </tr>
+      `;
+            return;
+        }
+
+        tbody.innerHTML = orders.map(order => `
+      <tr class="hover:bg-gray-50">
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-gray-900">${order.orderNumber}</div>
+          <div class="text-sm text-gray-500">ID: ${order.id}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <div class="text-sm font-medium text-gray-900">${order.username}</div>
+          <div class="text-sm text-gray-500">${order.phone}</div>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+          ${formatPrice(order.totalAmount)}₫
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentMethodClass(order.paymentMethod)}">
+            ${getPaymentMethodText(order.paymentMethod)}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClass(order.status, order.paymentStatus)}">
+            ${getStatusText(order.status, order.paymentStatus)}
+          </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+          ${formatDate(order.createdAt)}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+          <div class="flex space-x-2">
+            <button onclick="viewOrderDetail('${order.id}')" class="text-blue-600 hover:text-blue-900">
+              <i class="fas fa-eye"></i>
+            </button>
+            ${getActionButtons(order)}
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    }
+
+    // Get action buttons
+    function getActionButtons(order) {
+        let buttons = '';
+
+        if (order.status === 'PENDING') {
+            buttons += `<button onclick="updateOrderStatus('${order.id}', 'APPROVED')" class="text-blue-600 hover:text-blue-900 mr-2" title="Duyệt đơn hàng">
+        <i class="fas fa-check"></i>
+      </button>`;
+        }
+
+        if (order.status === 'APPROVED') {
+            buttons += `<button onclick="updateOrderStatus('${order.id}', 'SHIPPING')" class="text-orange-600 hover:text-orange-900 mr-2" title="Đang giao hàng">
+        <i class="fas fa-truck"></i>
+      </button>`;
+        }
+
+        if (order.status === 'SHIPPING') {
+            if (order.paymentMethod === 'COD') {
+                // Đơn hàng COD đang được shipper xử lý, không hiển thị nút
+                buttons += `<span class="text-orange-600 text-sm">
+                    <i class="fas fa-truck mr-1"></i>Shipper đang giao
+                </span>`;
+            } else {
+                buttons += `<button onclick="updateOrderStatus('${order.id}', 'DELIVERED')" class="text-green-600 hover:text-green-900 mr-2" title="Đã nhận hàng">
+          <i class="fas fa-check-circle"></i>
+        </button>`;
+            }
+        }
+
+        return buttons;
+    }
+
+    // Update COD order
+    async function updateCODOrderToDelivered(orderId) {
+        if (!confirm('Xác nhận khách hàng đã nhận hàng và thanh toán COD?')) return;
+
+        try {
+            const response = await fetch(`/api/cod/delivered/${orderId}`, { method: 'POST' });
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Đã cập nhật đơn hàng COD: Khách đã nhận hàng và thanh toán!');
+                loadOrders();
+            } else {
+                alert('Lỗi: ' + result.message);
+            }
+        } catch (error) {
+            alert('Lỗi khi cập nhật đơn hàng COD');
+        }
+    }
+
+    // Update status
+    async function updateOrderStatus(orderId, newStatus) {
+        if (!confirm(`Cập nhật trạng thái thành "${getStatusText(newStatus, '')}"?`)) return;
+
+        try {
+            const response = await fetch(`/api/admin/orders/${orderId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Đã cập nhật trạng thái!');
+                loadOrders();
+            } else {
+                alert('Lỗi: ' + result.message);
+            }
+        } catch (error) {
+            alert('Lỗi khi cập nhật trạng thái');
+        }
+    }
+
+    // View detail
+    async function viewOrderDetail(orderId) {
+        try {
+            const response = await fetch(`/api/admin/orders/${orderId}`);
+            const result = await response.json();
+
+            if (result.success) {
+                renderOrderDetail(result.data);
+                document.getElementById('orderDetailModal').classList.remove('hidden');
+            } else {
+                alert('Lỗi: ' + result.message);
+            }
+        } catch (error) {
+            alert('Lỗi khi tải chi tiết đơn hàng');
+        }
+    }
+
+    // Render detail
+    function renderOrderDetail(order) {
+        const content = document.getElementById('orderDetailContent');
+        content.innerHTML = `
+      <!-- PROGRESS BAR -->
+      <div th:replace="~{layouts/order-progress :: progress(${order})}" class="mb-6"></div>
+
+      <div class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Thông tin đơn hàng</h3>
+            <div class="space-y-2">
+              <p><span class="font-medium">Mã đơn hàng:</span> ${order.orderNumber}</p>
+              <p><span class="font-medium">Ngày tạo:</span> ${formatDate(order.createdAt)}</p>
+              <p><span class="font-medium">Trạng thái:</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusClass(order.status, order.paymentStatus)}">
+                  ${getStatusText(order.status, order.paymentStatus)}
+                </span>
+              </p>
+              <p><span class="font-medium">Phương thức thanh toán:</span>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPaymentMethodClass(order.paymentMethod)}">
+                  ${getPaymentMethodText(order.paymentMethod)}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Thông tin khách hàng</h3>
+            <div class="space-y-2">
+              <p><span class="font-medium">Tên:</span> ${order.username}</p>
+              <p><span class="font-medium">Số điện thoại:</span> ${order.phone}</p>
+              <p><span class="font-medium">Địa chỉ:</span> ${order.address}</p>
+              ${order.notes ? `<p><span class="font-medium">Ghi chú:</span> ${order.notes}</p>` : ''}
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="text-lg font-semibold mb-4">Sản phẩm</h3>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giá</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Số lượng</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thành tiền</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                ${order.items.map(item => `
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm font-medium text-gray-900">${item.productName}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ${formatPrice(item.price)}₫
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ${item.quantity}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ${formatPrice(item.totalPrice)}₫
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="border-t pt-4">
+          <div class="flex justify-end">
+            <div class="text-right">
+              <p class="text-2xl font-bold text-gray-900">Tổng cộng: ${formatPrice(order.totalAmount)}₫</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    }
+
+    // Close modal
+    function closeOrderDetailModal() {
+        document.getElementById('orderDetailModal').classList.add('hidden');
+    }
+
+    // Pagination
+    function renderPagination(pageData) {
+        const pagination = document.getElementById('pagination');
+        if (pageData.totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+
+        let html = '<div class="flex items-center justify-between">';
+        html += `<div class="text-sm text-gray-700">Hiển thị ${pageData.currentPage * pageData.size + 1}-${Math.min((pageData.currentPage + 1) * pageData.size, pageData.total)} của ${pageData.total}</div>`;
+        html += '<div class="flex space-x-2">';
+
+        if (pageData.currentPage > 0) {
+            html += `<button onclick="changePage(${pageData.currentPage - 1})" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Trước</button>`;
+        }
+
+        const start = Math.max(0, pageData.currentPage - 2);
+        const end = Math.min(pageData.totalPages - 1, pageData.currentPage + 2);
+
+        for (let i = start; i <= end; i++) {
+            const active = i === pageData.currentPage;
+            html += `<button onclick="changePage(${i})" class="px-3 py-2 text-sm font-medium ${active ? 'text-white bg-blue-600' : 'text-gray-500 bg-white border border-gray-300'} rounded-md hover:bg-gray-50">${i + 1}</button>`;
+        }
+
+        if (pageData.currentPage < pageData.totalPages - 1) {
+            html += `<button onclick="changePage(${pageData.currentPage + 1})" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Sau</button>`;
+        }
+
+        html += '</div></div>';
+        pagination.innerHTML = html;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        loadOrders();
+    }
+
+    function refreshOrders() {
+        loadOrders();
+    }
+
+    // Utility
+    function getStatusClass(status, paymentStatus) {
+        if (status === 'PENDING') return 'bg-yellow-100 text-yellow-800';
+        if (status === 'APPROVED') return 'bg-blue-100 text-blue-800';
+        if (status === 'SHIPPING') return 'bg-orange-100 text-orange-800';
+        if (status === 'DELIVERED') return 'bg-green-100 text-green-800';
+        if (status === 'CANCELLED') return 'bg-red-100 text-red-800';
+        return 'bg-gray-100 text-gray-800';
+    }
+
+    function getStatusText(status, paymentStatus) {
+        if (status === 'PENDING') return 'Chưa duyệt';
+        if (status === 'APPROVED') return 'Đã duyệt';
+        if (status === 'SHIPPING') return 'Đang giao hàng';
+        if (status === 'DELIVERED') return 'Đã giao hàng và thanh toán';
+        if (status === 'CANCELLED') return 'Đã hủy';
+        return status;
+    }
+
+    function getPaymentMethodClass(method) {
+        if (method === 'COD') return 'bg-green-100 text-green-800';
+        if (method === 'VNPAY') return 'bg-blue-100 text-blue-800';
+        return 'bg-gray-100 text-gray-800';
+    }
+
+    function getPaymentMethodText(method) {
+        if (method === 'COD') return 'COD';
+        if (method === 'VNPAY') return 'VNPay';
+        return method;
+    }
+
+    function formatPrice(price) {
+        return new Intl.NumberFormat('vi-VN').format(price);
+    }
+
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('vi-VN', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    // Init
+    document.addEventListener('DOMContentLoaded', loadOrders);
+</script>
+
+<style>
+    .filter-tab.active {
+        @apply bg-blue-500 text-white;
+    }
+</style>

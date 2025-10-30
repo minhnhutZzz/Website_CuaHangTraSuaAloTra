@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Products - Spring Boot Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">Debug Products</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-bug mr-2"></i>
+                Debug Information
+            </h2>
+            <div id="debug-info" class="space-y-2">
+                <p>Loading...</p>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-box mr-2"></i>
+                Products from API
+            </h2>
+            <button onclick="loadProducts()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors mb-4">
+                <i class="fas fa-refresh mr-2"></i>
+                Load Products
+            </button>
+            <div id="products-container" class="mt-4">
+                <p class="text-gray-500">Click "Load Products" to see products</p>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="/products" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors mr-4">
+                <i class="fas fa-eye mr-2"></i>
+                Xem trang sản phẩm
+            </a>
+            <a href="/" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                <i class="fas fa-home mr-2"></i>
+                Về trang chủ
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Debug information
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugInfo = document.getElementById('debug-info');
+            debugInfo.innerHTML = `
+                <p><strong>Current URL:</strong> ${window.location.href}</p>
+                <p><strong>API Base URL:</strong> /api/products</p>
+                <p><strong>Products Page URL:</strong> /products</p>
+                <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+            `;
+        });
+        
+        async function loadProducts() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '<p class="text-gray-500">Loading...</p>';
+            
+            try {
+                console.log('Fetching products from API...');
+                const response = await fetch('/api/products/paged?page=0&size=10');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('API Response:', data);
+                
+                if (data.success && data.data) {
+                    const products = data.data.content || data.data.items || [];
+                    console.log('Products found:', products.length);
+                    
+                    if (products.length === 0) {
+                        container.innerHTML = `
+                            <div class="text-center py-8">
+                                <i class="fas fa-box-open text-6xl text-gray-300 mb-4"></i>
+                                <h3 class="text-xl font-semibold text-gray-600 mb-2">Không có sản phẩm nào</h3>
+                                <p class="text-gray-500">Database có thể trống hoặc có lỗi API</p>
+                            </div>
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <div class="mb-4">
+                                <p class="text-green-600 font-semibold">✓ Tìm thấy ${products.length} sản phẩm</p>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                ${products.map(product => `
+                                    <div class="border rounded-lg p-4 bg-gray-50">
+                                        <h3 class="font-semibold text-gray-800 mb-2">${product.name}</h3>
+                                        <p class="text-gray-600 text-sm mb-2">${product.description || 'Không có mô tả'}</p>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-lg font-bold text-green-600">${product.price} ₫</span>
+                                            <span class="text-sm text-gray-500">Stock: ${product.stock}</span>
+                                        </div>
+                                        ${product.category ? `<p class="text-xs text-blue-600 mt-2">Category: ${product.category.name}</p>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                    }
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-exclamation-triangle text-6xl text-red-300 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-red-600 mb-2">Lỗi API</h3>
+                            <p class="text-gray-500">${data.message || 'Không thể tải sản phẩm'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-exclamation-triangle text-6xl text-red-300 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-red-600 mb-2">Lỗi kết nối</h3>
+                        <p class="text-gray-500">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

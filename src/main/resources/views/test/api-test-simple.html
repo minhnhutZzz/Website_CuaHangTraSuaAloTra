@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test Simple - Spring Boot Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">API Test Simple</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-bug mr-2"></i>
+                Test API Endpoints
+            </h2>
+            
+            <div class="space-y-4">
+                <button onclick="testAPI('/api/products/paged?page=0&size=10', 'products-0')" 
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+                    Test: page=0, size=10
+                </button>
+                
+                <button onclick="testAPI('/api/products/paged?page=1&size=10', 'products-1')" 
+                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">
+                    Test: page=1, size=10
+                </button>
+                
+                <button onclick="testAPI('/api/products', 'products-list')" 
+                        class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition-colors">
+                    Test: /api/products (list)
+                </button>
+            </div>
+        </div>
+        
+        <div id="results" class="space-y-4">
+            <!-- Results will be displayed here -->
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="/products" class="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 transition-colors mr-4">
+                <i class="fas fa-eye mr-2"></i>
+                Xem trang sản phẩm
+            </a>
+            <a href="/" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                <i class="fas fa-home mr-2"></i>
+                Về trang chủ
+            </a>
+        </div>
+    </div>
+
+    <script>
+        async function testAPI(url, resultId) {
+            const resultsDiv = document.getElementById('results');
+            
+            // Create result container if it doesn't exist
+            let resultContainer = document.getElementById(resultId);
+            if (!resultContainer) {
+                resultContainer = document.createElement('div');
+                resultContainer.id = resultId;
+                resultContainer.className = 'bg-white rounded-lg shadow-md p-6';
+                resultsDiv.appendChild(resultContainer);
+            }
+            
+            resultContainer.innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                    Testing: ${url}
+                </h3>
+                <p class="text-gray-500">Loading...</p>
+            `;
+            
+            try {
+                console.log(`Testing API: ${url}`);
+                const response = await fetch(url);
+                console.log(`Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log(`API Response for ${url}:`, data);
+                
+                let statusClass = 'text-green-600';
+                let statusIcon = 'fas fa-check-circle';
+                let statusText = 'Success';
+                
+                if (!data.success) {
+                    statusClass = 'text-red-600';
+                    statusIcon = 'fas fa-exclamation-circle';
+                    statusText = 'API Error';
+                } else if (data.data && (data.data.content || data.data.items)) {
+                    const products = data.data.content || data.data.items || [];
+                    if (products.length === 0) {
+                        statusClass = 'text-yellow-600';
+                        statusIcon = 'fas fa-exclamation-triangle';
+                        statusText = 'No Products';
+                    }
+                }
+                
+                resultContainer.innerHTML = `
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                        <i class="${statusIcon} mr-2 ${statusClass}"></i>
+                        ${statusText}: ${url}
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded">
+                        <pre class="text-sm text-gray-600 whitespace-pre-wrap overflow-auto max-h-96">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error(`Error testing ${url}:`, error);
+                resultContainer.innerHTML = `
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">
+                        <i class="fas fa-exclamation-triangle mr-2 text-red-600"></i>
+                        Error: ${url}
+                    </h3>
+                    <div class="bg-red-50 p-4 rounded">
+                        <p class="text-red-600">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test - Spring Boot Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">API Test</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Test Products API -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-box mr-2"></i>
+                    Products API Test
+                </h2>
+                <button onclick="testProductsAPI()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors mb-4">
+                    <i class="fas fa-play mr-2"></i>
+                    Test Products API
+                </button>
+                <div id="products-result" class="mt-4 p-4 bg-gray-50 rounded hidden">
+                    <h3 class="font-semibold mb-2">Kết quả:</h3>
+                    <pre id="products-data" class="text-sm text-gray-600 whitespace-pre-wrap"></pre>
+                </div>
+            </div>
+            
+            <!-- Test Categories API -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                    <i class="fas fa-tags mr-2"></i>
+                    Categories API Test
+                </h2>
+                <button onclick="testCategoriesAPI()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors mb-4">
+                    <i class="fas fa-play mr-2"></i>
+                    Test Categories API
+                </button>
+                <div id="categories-result" class="mt-4 p-4 bg-gray-50 rounded hidden">
+                    <h3 class="font-semibold mb-2">Kết quả:</h3>
+                    <pre id="categories-data" class="text-sm text-gray-600 whitespace-pre-wrap"></pre>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-8 text-center">
+            <a href="/data-init/create-sample-data" class="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition-colors mr-4">
+                <i class="fas fa-database mr-2"></i>
+                Tạo dữ liệu mẫu
+            </a>
+            <a href="/products" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors mr-4">
+                <i class="fas fa-eye mr-2"></i>
+                Xem trang sản phẩm
+            </a>
+            <a href="/" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors">
+                <i class="fas fa-home mr-2"></i>
+                Về trang chủ
+            </a>
+        </div>
+    </div>
+
+    <script>
+        async function testProductsAPI() {
+            const resultDiv = document.getElementById('products-result');
+            const dataDiv = document.getElementById('products-data');
+            
+            try {
+                resultDiv.classList.remove('hidden');
+                dataDiv.textContent = 'Đang tải...';
+                
+                const response = await fetch('/api/products/paged?page=0&size=10');
+                const data = await response.json();
+                
+                dataDiv.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    resultDiv.className = 'mt-4 p-4 bg-green-50 rounded';
+                } else {
+                    resultDiv.className = 'mt-4 p-4 bg-red-50 rounded';
+                }
+            } catch (error) {
+                resultDiv.classList.remove('hidden');
+                resultDiv.className = 'mt-4 p-4 bg-red-50 rounded';
+                dataDiv.textContent = 'Lỗi: ' + error.message;
+            }
+        }
+        
+        async function testCategoriesAPI() {
+            const resultDiv = document.getElementById('categories-result');
+            const dataDiv = document.getElementById('categories-data');
+            
+            try {
+                resultDiv.classList.remove('hidden');
+                dataDiv.textContent = 'Đang tải...';
+                
+                const response = await fetch('/api/categories');
+                const data = await response.json();
+                
+                dataDiv.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    resultDiv.className = 'mt-4 p-4 bg-green-50 rounded';
+                } else {
+                    resultDiv.className = 'mt-4 p-4 bg-red-50 rounded';
+                }
+            } catch (error) {
+                resultDiv.classList.remove('hidden');
+                resultDiv.className = 'mt-4 p-4 bg-red-50 rounded';
+                dataDiv.textContent = 'Lỗi: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

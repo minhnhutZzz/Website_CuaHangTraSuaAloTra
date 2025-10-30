@@ -1,0 +1,109 @@
+<!-- src/main/resources/templates/shipper-dashboard.html -->
+<div th:replace="~{layouts/authLayout :: layout('Shipper - Giao hàng', ~{::content})}">
+    <div th:fragment="content">
+        <div class="p-6 max-w-6xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-blue-700">Đơn hàng cần giao</h1>
+                <button onclick="loadOrders()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                    <i class="fas fa-sync-alt"></i> Làm mới
+                </button>
+            </div>
+
+            <div id="ordersList" class="space-y-5"></div>
+        </div>
+    </div>
+</div>
+
+<!-- LẤY SHIPPER ID TỪ USER ĐANG LOGIN -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    // Tạm thời sử dụng shipperId cố định để test
+    const shipperId = "shipper123"; // Thay thế bằng ID thực tế từ session hoặc database
+    console.log("Shipper ID:", shipperId);
+    /*]]>*/
+</script>
+
+<script>
+    async function loadOrders() {
+        const container = document.getElementById('ordersList');
+        try {
+            const res = await fetch(`/api/shipper/orders/available?page=0&size=20`);
+            const json = await res.json();
+            if (!json.success) throw new Error(json.message || "Lỗi tải đơn");
+
+            container.innerHTML = json.data.map(order => `
+        <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500 hover:shadow-lg transition-shadow">
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <p class="font-mono text-lg font-bold text-blue-700">#${order.orderNumber}</p>
+              <p class="text-sm text-gray-600">Ngày: ${new Date(order.createdAt).toLocaleString('vi-VN')}</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-xs font-medium ${order.paymentMethod === 'COD' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}">
+              ${order.paymentMethod === 'COD' ? 'COD - Thu tiền' : 'VNPay - Đã trả'}
+            </span>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <p class="font-medium">Khách hàng:</p>
+              <p>${order.username} - ${order.phone}</p>
+              <p class="text-sm text-gray-600">${order.address}</p>
+              <p class="text-xs text-gray-500 mt-1">${order.notes ? 'Ghi chú: ' + order.notes : ''}</p>
+            </div>
+            <div>
+              <p class="font-medium mb-1">Sản phẩm:</p>
+              <ul class="text-sm space-y-1">
+                ${order.items.map(item => `
+                  <li class="flex justify-between">
+                    <span>• ${item.productName}</span>
+                    <span class="text-gray-600">x${item.quantity}</span>
+                  </li>
+                `).join('')}
+              </ul>
+              <p class="font-bold text-right mt-2 text-lg">Tổng: ${order.totalAmount.toLocaleString()}₫</p>
+            </div>
+          </div>
+
+          <div th:replace="~{layouts/order-progress :: progress(${order})}" class="mb-4"></div>
+
+          <div class="flex gap-3 justify-end">
+            <button onclick="takeOrder('${order.id}')"
+                    class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium flex items-center gap-2">
+              <i class="fas fa-truck"></i> Nhận giao
+            </button>
+            <button onclick="viewDetail('${order.id}')"
+                    class="px-5 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium">
+              Chi tiết
+            </button>
+          </div>
+        </div>
+      `).join('') || '<p class="text-center text-gray-500 py-8">Không có đơn hàng nào</p>';
+        } catch (err) {
+            container.innerHTML = `<p class="text-red-500 text-center">Lỗi: ${err.message}</p>`;
+        }
+    }
+
+    async function takeOrder(orderId) {
+        if (!confirm("Xác nhận nhận giao đơn này?")) return;
+        try {
+            const res = await fetch(`/api/shipper/orders/${orderId}/take?shipperId=${shipperId}`, { method: 'POST' });
+            const json = await res.json();
+            if (json.success) {
+                alert("Đã nhận giao thành công!");
+                loadOrders();
+            } else {
+                alert(json.message || "Lỗi khi nhận đơn");
+            }
+        } catch (err) {
+            alert("Lỗi kết nối: " + err.message);
+        }
+    }
+
+    function viewDetail(orderId) {
+        window.open(`/admin/orders/detail/${orderId}`, '_blank');
+    }
+
+    // TỰ ĐỘNG TẢI + LÀM MỚI MỖI 30 GIÂY
+    loadOrders();
+    setInterval(loadOrders, 30000);
+</script>
